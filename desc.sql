@@ -5,6 +5,6 @@
 \dS StudentsClass;
 \dS ClassTeachers;
 \dS typeEvaluation;
-\dS typeMatiere;
-\dS Matiere;
-\dS Note;
+\dS typeSubjects;
+\dS Subjects;
+\dS Grades;

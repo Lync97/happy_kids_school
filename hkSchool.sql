@@ -110,44 +110,44 @@ CREATE TABLE IF NOT EXISTS typeEvaluation
     CONSTRAINT chk_categories CHECK (categories IN('1er Trimestre','2eme Trimestre','3eme Trimestre'))
 );
 
--- Table: typeMatiere
-CREATE TABLE IF NOT EXISTS typeMatiere
+-- Table: typeSubjects
+CREATE TABLE IF NOT EXISTS typeSubjects
 (
     id SERIAL,
     categories VARCHAR(50) NOT NULL,
-    CONSTRAINT pk_typeMatiere PRIMARY KEY (id)
+    CONSTRAINT pk_typeSubjects PRIMARY KEY (id)
 );
 
--- Table: Matiere
-CREATE TABLE IF NOT EXISTS Matiere
+-- Table: Subjects
+CREATE TABLE IF NOT EXISTS Subjects
 (
     id SERIAL,
-    idTypeMatiere INTEGER,
+    idTypeSubjects INTEGER,
     name VARCHAR(100) NOT NULL,
     coeff real NOT NULL,
     detail TEXT NOT NULL DEFAULT 'Aucun detail',
-    CONSTRAINT pk_Matiere PRIMARY KEY (id),
-    CONSTRAINT fk_Matiere_idTypeMatiere FOREIGN KEY (idTypeMatiere)
-        REFERENCES typeMatiere (id),
+    CONSTRAINT pk_Subjects PRIMARY KEY (id),
+    CONSTRAINT fk_Subjects_idTypeSubjects FOREIGN KEY (idTypeSubjects)
+        REFERENCES typeSubjects (id),
     CONSTRAINT chk_coeff CHECK (coeff BETWEEN 1 AND 4)
 );
 
--- Table: Note
-CREATE TABLE IF NOT EXISTS Note
+-- Table: Grades
+CREATE TABLE IF NOT EXISTS Grades
 (
     idStudents INTEGER NOT NULL,
-    idMatiere INTEGER NOT NULL,
+    idSubjects INTEGER NOT NULL,
     idTypeEvaluation INTEGER NOT NULL,
-    dateNote date DEFAULT CURRENT_DATE,
+    dateGrades date DEFAULT CURRENT_DATE,
     nombreDePoint numeric NOT NULL,
     anneeAcademique VARCHAR(9) NOT NULL,
     commentaire VARCHAR(255) NOT NULL DEFAULT 'OK',
-    CONSTRAINT pk_Note PRIMARY KEY (idStudents, idMatiere, idTypeEvaluation, anneeAcademique),
-    CONSTRAINT fk_Note_idMatiere FOREIGN KEY (idMatiere)
-        REFERENCES Matiere (id),
-    CONSTRAINT fk_Note_idStudents FOREIGN KEY (idStudents)
+    CONSTRAINT pk_Grades PRIMARY KEY (idStudents, idSubjects, idTypeEvaluation, anneeAcademique),
+    CONSTRAINT fk_Grades_idSubjects FOREIGN KEY (idSubjects)
+        REFERENCES Subjects (id),
+    CONSTRAINT fk_Grades_idStudents FOREIGN KEY (idStudents)
         REFERENCES Students (id),
-    CONSTRAINT fk_Note_idTypeEvaluation FOREIGN KEY (idTypeEvaluation)
+    CONSTRAINT fk_Grades_idTypeEvaluation FOREIGN KEY (idTypeEvaluation)
         REFERENCES typeEvaluation (id),
     CONSTRAINT chk_nombreDePoint CHECK (nombreDePoint BETWEEN 0 AND 100)
 );
@@ -219,8 +219,8 @@ INSERT INTO typeEvaluation (categories) VALUES
 ('2eme Trimestre'),
 ('3eme Trimestre');
 
--- INSERT: typeMatiere
-INSERT INTO typeMatiere (categories) VALUES
+-- INSERT: typeSubjects
+INSERT INTO typeSubjects (categories) VALUES
 ('Sciences'),
 ('Langues'),
 ('Sciences sociales'),
@@ -228,8 +228,8 @@ INSERT INTO typeMatiere (categories) VALUES
 ('Sport et education physique'),
 ('Technologie');
 
--- INSERT: Matiere
-INSERT INTO Matiere (idTypeMatiere, name, coeff) VALUES
+-- INSERT: Subjects
+INSERT INTO Subjects (idTypeSubjects, name, coeff) VALUES
 (1, 'Sciences experimentale', 3), 
 (3, 'Histoire', 2), 
 (3, 'Geographie', 2), 
@@ -243,11 +243,11 @@ INSERT INTO Matiere (idTypeMatiere, name, coeff) VALUES
 (6, 'Informatique', 1), 
 (1, 'Mathematiques', 3);
 
--- INSERT: Note
+-- INSERT: Grades
 
 -- 1er Trimestre
 
-INSERT INTO Note (idStudents, idMatiere, idTypeEvaluation, dateNote, nombreDePoint, anneeAcademique) VALUES
+INSERT INTO Grades (idStudents, idSubjects, idTypeEvaluation, dateGrades, nombreDePoint, anneeAcademique) VALUES
 (1, 1, 1, TO_DATE('2020-12-15','YYYY-MM-DD'), 80, '2020-2021'),
 (1, 2, 1, TO_DATE('2020-12-15','YYYY-MM-DD'), 85, '2020-2021'),
 (2, 1, 1, TO_DATE('2020-12-15','YYYY-MM-DD'), 70, '2020-2021'),
@@ -269,7 +269,7 @@ INSERT INTO Note (idStudents, idMatiere, idTypeEvaluation, dateNote, nombreDePoi
 (10, 1, 1, TO_DATE('2020-12-15','YYYY-MM-DD'), 59, '2020-2021'),
 (10, 2, 1, TO_DATE('2020-12-15','YYYY-MM-DD'), 82, '2020-2021');
 
-INSERT INTO Note (idStudents, idMatiere, idTypeEvaluation, dateNote, nombreDePoint, anneeAcademique) VALUES
+INSERT INTO Grades (idStudents, idSubjects, idTypeEvaluation, dateGrades, nombreDePoint, anneeAcademique) VALUES
 (1, 3, 1, TO_DATE('2020-12-16','YYYY-MM-DD'), 78, '2020-2021'),
 (1, 4, 1, TO_DATE('2020-12-16','YYYY-MM-DD'), 45, '2020-2021'),
 (2, 3, 1, TO_DATE('2020-12-16','YYYY-MM-DD'), 68, '2020-2021'),
@@ -291,7 +291,7 @@ INSERT INTO Note (idStudents, idMatiere, idTypeEvaluation, dateNote, nombreDePoi
 (10, 3,	1, TO_DATE('2020-12-16','YYYY-MM-DD'), 79, '2020-2021'),
 (10, 4,	1, TO_DATE('2020-12-16','YYYY-MM-DD'), 68, '2020-2021');
 
-INSERT INTO Note (idStudents, idMatiere, idTypeEvaluation, dateNote, nombreDePoint, anneeAcademique) VALUES
+INSERT INTO Grades (idStudents, idSubjects, idTypeEvaluation, dateGrades, nombreDePoint, anneeAcademique) VALUES
 (1,	5, 1, TO_DATE('2020-12-17','YYYY-MM-DD'), 89, '2020-2021'),
 (1,	6, 1, TO_DATE('2020-12-17','YYYY-MM-DD'), 59, '2020-2021'),
 (2,	5, 1, TO_DATE('2020-12-17','YYYY-MM-DD'), 70, '2020-2021'),
@@ -313,7 +313,7 @@ INSERT INTO Note (idStudents, idMatiere, idTypeEvaluation, dateNote, nombreDePoi
 (10, 5,	1, TO_DATE('2020-12-17','YYYY-MM-DD'), 98, '2020-2021'),
 (10, 6,	1, TO_DATE('2020-12-17','YYYY-MM-DD'), 78, '2020-2021');
 
-INSERT INTO Note (idStudents, idMatiere, idTypeEvaluation, dateNote, nombreDePoint, anneeAcademique) VALUES
+INSERT INTO Grades (idStudents, idSubjects, idTypeEvaluation, dateGrades, nombreDePoint, anneeAcademique) VALUES
 (1,	7, 1, TO_DATE('2020-12-18','YYYY-MM-DD'), 88, '2020-2021'),
 (1,	8, 1, TO_DATE('2020-12-18','YYYY-MM-DD'), 57, '2020-2021'),
 (2, 7, 1, TO_DATE('2020-12-18','YYYY-MM-DD'), 49, '2020-2021'),
@@ -335,7 +335,7 @@ INSERT INTO Note (idStudents, idMatiere, idTypeEvaluation, dateNote, nombreDePoi
 (10, 7,	1, TO_DATE('2020-12-18','YYYY-MM-DD'), 89, '2020-2021'),
 (10, 8,	1, TO_DATE('2020-12-18','YYYY-MM-DD'), 69, '2020-2021');
 
-INSERT INTO Note (idStudents, idMatiere, idTypeEvaluation, dateNote, nombreDePoint, anneeAcademique) VALUES
+INSERT INTO Grades (idStudents, idSubjects, idTypeEvaluation, dateGrades, nombreDePoint, anneeAcademique) VALUES
 (1, 9, 1, TO_DATE('2020-12-19','YYYY-MM-DD'), 90, '2020-2021'),
 (1, 10, 1, TO_DATE('2020-12-19','YYYY-MM-DD'), 93, '2020-2021'),
 (2, 9, 1, TO_DATE('2020-12-19','YYYY-MM-DD'), 95, '2020-2021'),
@@ -357,7 +357,7 @@ INSERT INTO Note (idStudents, idMatiere, idTypeEvaluation, dateNote, nombreDePoi
 (10, 9, 1, TO_DATE('2020-12-19','YYYY-MM-DD'), 54, '2020-2021'),
 (10, 10, 1, TO_DATE('2020-12-19','YYYY-MM-DD'), 75, '2020-2021');
 
-INSERT INTO Note (idStudents, idMatiere, idTypeEvaluation, dateNote, nombreDePoint, anneeAcademique) VALUES
+INSERT INTO Grades (idStudents, idSubjects, idTypeEvaluation, dateGrades, nombreDePoint, anneeAcademique) VALUES
 (1, 11, 1, TO_DATE('2020-12-20','YYYY-MM-DD'), 67, '2020-2021'),
 (1, 12, 1, TO_DATE('2020-12-20','YYYY-MM-DD'), 68, '2020-2021'),
 (2, 11, 1, TO_DATE('2020-12-20','YYYY-MM-DD'), 73, '2020-2021'),
@@ -382,7 +382,7 @@ INSERT INTO Note (idStudents, idMatiere, idTypeEvaluation, dateNote, nombreDePoi
 
 -- 2eme Trimestre
 
-INSERT INTO Note (idStudents, idMatiere, idTypeEvaluation, dateNote, nombreDePoint, anneeAcademique) VALUES
+INSERT INTO Grades (idStudents, idSubjects, idTypeEvaluation, dateGrades, nombreDePoint, anneeAcademique) VALUES
 (1, 1, 2, TO_DATE('2021-04-15','YYYY-MM-DD'), 50, '2020-2021'),
 (1, 2, 2, TO_DATE('2021-04-15','YYYY-MM-DD'), 65, '2020-2021'),
 (2, 1, 2, TO_DATE('2021-04-15','YYYY-MM-DD'), 90, '2020-2021'),
@@ -404,7 +404,7 @@ INSERT INTO Note (idStudents, idMatiere, idTypeEvaluation, dateNote, nombreDePoi
 (10, 1, 2, TO_DATE('2021-04-15','YYYY-MM-DD'), 89, '2020-2021'),
 (10, 2, 2, TO_DATE('2021-04-15','YYYY-MM-DD'), 62, '2020-2021');
 
-INSERT INTO Note (idStudents, idMatiere, idTypeEvaluation, dateNote, nombreDePoint, anneeAcademique) VALUES
+INSERT INTO Grades (idStudents, idSubjects, idTypeEvaluation, dateGrades, nombreDePoint, anneeAcademique) VALUES
 (1, 3, 2, TO_DATE('2021-04-16','YYYY-MM-DD'), 56, '2020-2021'),
 (1, 4, 2, TO_DATE('2021-04-16','YYYY-MM-DD'), 87, '2020-2021'),
 (2, 3, 2, TO_DATE('2021-04-16','YYYY-MM-DD'), 47, '2020-2021'),
@@ -426,7 +426,7 @@ INSERT INTO Note (idStudents, idMatiere, idTypeEvaluation, dateNote, nombreDePoi
 (10, 3, 2, TO_DATE('2021-04-16','YYYY-MM-DD'), 67, '2020-2021'),
 (10, 4, 2, TO_DATE('2021-04-16','YYYY-MM-DD'), 76, '2020-2021');
 
-INSERT INTO Note (idStudents, idMatiere, idTypeEvaluation, dateNote, nombreDePoint, anneeAcademique) VALUES
+INSERT INTO Grades (idStudents, idSubjects, idTypeEvaluation, dateGrades, nombreDePoint, anneeAcademique) VALUES
 (1, 5, 2, TO_DATE('2021-04-17','YYYY-MM-DD'), 79, '2020-2021'),
 (1, 6, 2, TO_DATE('2021-04-17','YYYY-MM-DD'), 79, '2020-2021'),
 (2, 5, 2, TO_DATE('2021-04-17','YYYY-MM-DD'), 40, '2020-2021'),
@@ -448,7 +448,7 @@ INSERT INTO Note (idStudents, idMatiere, idTypeEvaluation, dateNote, nombreDePoi
 (10, 5, 2, TO_DATE('2021-04-17','YYYY-MM-DD'), 68, '2020-2021'),
 (10, 6, 2, TO_DATE('2021-04-17','YYYY-MM-DD'), 68, '2020-2021');
 
-INSERT INTO Note (idStudents, idMatiere, idTypeEvaluation, dateNote, nombreDePoint, anneeAcademique) VALUES
+INSERT INTO Grades (idStudents, idSubjects, idTypeEvaluation, dateGrades, nombreDePoint, anneeAcademique) VALUES
 (1, 7, 2, TO_DATE('2021-04-18','YYYY-MM-DD'), 56, '2020-2021'),
 (1, 8, 2, TO_DATE('2021-04-18','YYYY-MM-DD'), 85, '2020-2021'),
 (2, 7, 2, TO_DATE('2021-04-18','YYYY-MM-DD'), 45, '2020-2021'),
@@ -470,7 +470,7 @@ INSERT INTO Note (idStudents, idMatiere, idTypeEvaluation, dateNote, nombreDePoi
 (10, 7, 2, TO_DATE('2021-04-18','YYYY-MM-DD'), 76, '2020-2021'),
 (10, 8, 2, TO_DATE('2021-04-18','YYYY-MM-DD'), 58, '2020-2021');
 
-INSERT INTO Note (idStudents, idMatiere, idTypeEvaluation, dateNote, nombreDePoint, anneeAcademique) VALUES
+INSERT INTO Grades (idStudents, idSubjects, idTypeEvaluation, dateGrades, nombreDePoint, anneeAcademique) VALUES
 (1, 9, 2, TO_DATE('2021-04-19','YYYY-MM-DD'), 40, '2020-2021'),
 (1, 10, 2, TO_DATE('2021-04-19','YYYY-MM-DD'), 73, '2020-2021'),
 (2, 9, 2, TO_DATE('2021-04-19','YYYY-MM-DD'), 55, '2020-2021'),
@@ -492,7 +492,7 @@ INSERT INTO Note (idStudents, idMatiere, idTypeEvaluation, dateNote, nombreDePoi
 (10, 9, 2, TO_DATE('2021-04-19','YYYY-MM-DD'), 84, '2020-2021'),
 (10, 10, 2, TO_DATE('2021-04-19','YYYY-MM-DD'), 85, '2020-2021');
 
-INSERT INTO Note (idStudents, idMatiere, idTypeEvaluation, dateNote, nombreDePoint, anneeAcademique) VALUES
+INSERT INTO Grades (idStudents, idSubjects, idTypeEvaluation, dateGrades, nombreDePoint, anneeAcademique) VALUES
 (1, 11, 2, TO_DATE('2021-04-20','YYYY-MM-DD'), 40, '2020-2021'),
 (1, 12, 2, TO_DATE('2021-04-20','YYYY-MM-DD'), 65, '2020-2021'),
 (2, 11, 2, TO_DATE('2021-04-20','YYYY-MM-DD'), 35, '2020-2021'),
@@ -517,7 +517,7 @@ INSERT INTO Note (idStudents, idMatiere, idTypeEvaluation, dateNote, nombreDePoi
 
 -- 3eme Trimestre
 
-INSERT INTO Note (idStudents, idMatiere, idTypeEvaluation, dateNote, nombreDePoint, anneeAcademique) VALUES
+INSERT INTO Grades (idStudents, idSubjects, idTypeEvaluation, dateGrades, nombreDePoint, anneeAcademique) VALUES
 (1, 1, 3, TO_DATE('2021-07-15','YYYY-MM-DD'), 60, '2020-2021'),
 (1, 2, 3, TO_DATE('2021-07-15','YYYY-MM-DD'), 55, '2020-2021'),
 (2, 1, 3, TO_DATE('2021-07-15','YYYY-MM-DD'), 80, '2020-2021'),
@@ -539,7 +539,7 @@ INSERT INTO Note (idStudents, idMatiere, idTypeEvaluation, dateNote, nombreDePoi
 (10, 1, 3, TO_DATE('2021-07-15','YYYY-MM-DD'), 59, '2020-2021'),
 (10, 2, 3, TO_DATE('2021-07-15','YYYY-MM-DD'), 62, '2020-2021');
 
-INSERT INTO Note (idStudents, idMatiere, idTypeEvaluation, dateNote, nombreDePoint, anneeAcademique) VALUES
+INSERT INTO Grades (idStudents, idSubjects, idTypeEvaluation, dateGrades, nombreDePoint, anneeAcademique) VALUES
 (1, 3, 3, TO_DATE('2021-07-16','YYYY-MM-DD'), 78, '2020-2021'),
 (1, 4, 3, TO_DATE('2021-07-16','YYYY-MM-DD'), 45, '2020-2021'),
 (2, 3, 3, TO_DATE('2021-07-16','YYYY-MM-DD'), 68, '2020-2021'),
@@ -561,7 +561,7 @@ INSERT INTO Note (idStudents, idMatiere, idTypeEvaluation, dateNote, nombreDePoi
 (10, 3, 3, TO_DATE('2021-07-16','YYYY-MM-DD'), 79, '2020-2021'),
 (10, 4, 3, TO_DATE('2021-07-16','YYYY-MM-DD'), 68, '2020-2021');
 
-INSERT INTO Note (idStudents, idMatiere, idTypeEvaluation, dateNote, nombreDePoint, anneeAcademique) VALUES
+INSERT INTO Grades (idStudents, idSubjects, idTypeEvaluation, dateGrades, nombreDePoint, anneeAcademique) VALUES
 (1, 5, 3, TO_DATE('2021-07-17','YYYY-MM-DD'), 67, '2020-2021'),
 (1, 6, 3, TO_DATE('2021-07-17','YYYY-MM-DD'), 69, '2020-2021'),
 (2, 5, 3, TO_DATE('2021-07-17','YYYY-MM-DD'), 70, '2020-2021'),
@@ -583,7 +583,7 @@ INSERT INTO Note (idStudents, idMatiere, idTypeEvaluation, dateNote, nombreDePoi
 (10, 5, 3, TO_DATE('2021-07-17','YYYY-MM-DD'), 78, '2020-2021'),
 (10, 6, 3, TO_DATE('2021-07-17','YYYY-MM-DD'), 78, '2020-2021');
 
-INSERT INTO Note (idStudents, idMatiere, idTypeEvaluation, dateNote, nombreDePoint, anneeAcademique) VALUES
+INSERT INTO Grades (idStudents, idSubjects, idTypeEvaluation, dateGrades, nombreDePoint, anneeAcademique) VALUES
 (1, 7, 3, TO_DATE('2021-07-18','YYYY-MM-DD'), 88, '2020-2021'),
 (1, 8, 3, TO_DATE('2021-07-18','YYYY-MM-DD'), 57, '2020-2021'),
 (2, 7, 3, TO_DATE('2021-07-18','YYYY-MM-DD'), 49, '2020-2021'),
@@ -605,7 +605,7 @@ INSERT INTO Note (idStudents, idMatiere, idTypeEvaluation, dateNote, nombreDePoi
 (10, 7, 3, TO_DATE('2021-07-18','YYYY-MM-DD'), 67, '2020-2021'),
 (10, 8, 3, TO_DATE('2021-07-18','YYYY-MM-DD'), 79, '2020-2021');
 
-INSERT INTO Note (idStudents, idMatiere, idTypeEvaluation, dateNote, nombreDePoint, anneeAcademique) VALUES
+INSERT INTO Grades (idStudents, idSubjects, idTypeEvaluation, dateGrades, nombreDePoint, anneeAcademique) VALUES
 (1, 9, 3, TO_DATE('2021-07-19','YYYY-MM-DD'), 80, '2020-2021'),
 (1, 10, 3, TO_DATE('2021-07-19','YYYY-MM-DD'), 73, '2020-2021'),
 (2, 9, 3, TO_DATE('2021-07-19','YYYY-MM-DD'), 65, '2020-2021'),
@@ -627,7 +627,7 @@ INSERT INTO Note (idStudents, idMatiere, idTypeEvaluation, dateNote, nombreDePoi
 (10, 9, 3, TO_DATE('2021-07-19','YYYY-MM-DD'), 74, '2020-2021'),
 (10, 10, 3, TO_DATE('2021-07-19','YYYY-MM-DD'), 65, '2020-2021');
 
-INSERT INTO Note (idStudents, idMatiere, idTypeEvaluation, dateNote, nombreDePoint, anneeAcademique) VALUES
+INSERT INTO Grades (idStudents, idSubjects, idTypeEvaluation, dateGrades, nombreDePoint, anneeAcademique) VALUES
 (1, 11, 3, TO_DATE('2021-07-20','YYYY-MM-DD'), 67, '2020-2021'),
 (1, 12, 3, TO_DATE('2021-07-20','YYYY-MM-DD'), 68, '2020-2021'),
 (2, 11, 3, TO_DATE('2021-07-20','YYYY-MM-DD'), 73, '2020-2021'),

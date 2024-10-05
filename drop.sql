@@ -1,6 +1,6 @@
-DROP TABLE Note;
-DROP TABLE Matiere;
-DROP TABLE typeMatiere;
+DROP TABLE Grades;
+DROP TABLE Subjects;
+DROP TABLE typeSubjects;
 DROP TABLE typeEvaluation;
 DROP TABLE ClassTeachers;
 DROP TABLE StudentsClass;
