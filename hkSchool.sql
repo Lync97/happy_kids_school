@@ -1,6 +1,6 @@
 
 -- Database: happykidsschool
-CREATE DATABASE IF NOT EXISTS happykidsschool
+CREATE DATABASE happykidsschool
     WITH
     OWNER = steph;
 
@@ -64,40 +64,40 @@ CREATE TABLE IF NOT EXISTS Teachers
     CONSTRAINT chk_sex_Teachers CHECK (sex IN('M','F'))
 );
 
--- Table: Class
-CREATE TABLE IF NOT EXISTS Class
+-- Table: Classes
+CREATE TABLE IF NOT EXISTS Classes
 (
     id SERIAL,
     class VARCHAR(10) NOT NULL,
     type CHAR(1) NOT NULL,
-    CONSTRAINT pk_Class PRIMARY KEY (id),
-    CONSTRAINT chk_Class_Class CHECK (class IN('1er Annee','2eme Annee','3eme Annee','4eme Annee','5eme Annee','6eme Annee')),
-    CONSTRAINT chk_type_Class CHECK (type IN('A','B','C','D'))
+    CONSTRAINT pk_Classes PRIMARY KEY (id),
+    CONSTRAINT chk_Classes_class CHECK (classIN('1er Annee','2eme Annee','3eme Annee','4eme Annee','5eme Annee','6eme Annee')),
+    CONSTRAINT chk_type_Classes CHECK (type IN('A','B','C','D'))
 );
 
--- Table: StudentsClass
-CREATE TABLE IF NOT EXISTS StudentsClass
+-- Table: StudentsClasses
+CREATE TABLE IF NOT EXISTS StudentsClasses
 (
     idStudents INTEGER NOT NULL,
-    idClass INTEGER NOT NULL,
+    idClasses INTEGER NOT NULL,
     anneeAcademique VARCHAR(9) NOT NULL,
-    CONSTRAINT pk_StudentsClass PRIMARY KEY (idStudents, idClass, anneeAcademique),
-    CONSTRAINT fk_StudentsClass_idClass FOREIGN KEY (idClass)
-        REFERENCES Class (id),
-    CONSTRAINT fk_StudentsClass_idStudents FOREIGN KEY (idStudents)
+    CONSTRAINT pk_StudentsClasses PRIMARY KEY (idStudents, idClasses, anneeAcademique),
+    CONSTRAINT fk_StudentsClasses_idClasses FOREIGN KEY (idClasses)
+        REFERENCES Classes (id),
+    CONSTRAINT fk_StudentsClasses_idStudents FOREIGN KEY (idStudents)
         REFERENCES Students (id)
 );
 
--- Table: ClassTeachers
-CREATE TABLE IF NOT EXISTS ClassTeachers
+-- Table: ClassesTeachers
+CREATE TABLE IF NOT EXISTS ClassesTeachers
 (
-    idClass INTEGER NOT NULL,
+    idClasses INTEGER NOT NULL,
     idTeachers INTEGER NOT NULL,
     anneeAcademique VARCHAR(9) NOT NULL,
-    CONSTRAINT pk_ClassTeachers PRIMARY KEY (idClass, idTeachers, anneeAcademique),
-    CONSTRAINT fk_ClassTeachers_idClass FOREIGN KEY (idClass)
-        REFERENCES Class (id),
-    CONSTRAINT fk_ClassTeachers_idTeachers FOREIGN KEY (idTeachers)
+    CONSTRAINT pk_ClassesTeachers PRIMARY KEY (idClasses, idTeachers, anneeAcademique),
+    CONSTRAINT fk_ClassesTeachers_idClasses FOREIGN KEY (idClasses)
+        REFERENCES Classes (id),
+    CONSTRAINT fk_ClassesTeachers_idTeachers FOREIGN KEY (idTeachers)
         REFERENCES Teachers (id)
 );
 
@@ -184,16 +184,16 @@ INSERT INTO Teachers (firstName, lastName, sex, address, tel, email, dateNaiss, 
 ('jacques', 'cadet', 'M', 'Rue Faustin #87 Petit-goave, Haiti', '+509 4149 4403', 'jacquescadet@gmail.com', TO_DATE('1994-01-29','YYYY-MM-DD'), TO_DATE('2020-04-25','YYYY-MM-DD')),
 ('cajuste', 'nadia', 'F', 'Avenue Gaston #67 Petit-goave, Haiti', '+509 4149 4404', 'cajustenadia@gmail.com', TO_DATE('1997-08-10','YYYY-MM-DD'), TO_DATE('2020-02-27','YYYY-MM-DD'));
 
--- INSERT: Class
-INSERT INTO Class (class, type) VALUES 
+-- INSERT: Classes
+INSERT INTO Classes (class, type) VALUES 
 ('1er Annee', 'A'),
 ('2eme Annee', 'A'),
 ('3eme Annee', 'A'),
 ('4eme Annee', 'A'),
 ('5eme Annee', 'A');
 
--- INSERT: StudentsClass
-INSERT INTO StudentsClass (idStudents, idClass, anneeAcademique) VALUES
+-- INSERT: StudentsClasses
+INSERT INTO StudentsClasses (idStudents, idClasses, anneeAcademique) VALUES
 (1, 1, '2020-2021'),
 (2, 1, '2020-2021'),
 (3, 2, '2020-2021'),
@@ -205,8 +205,8 @@ INSERT INTO StudentsClass (idStudents, idClass, anneeAcademique) VALUES
 (9, 5, '2020-2021'),
 (10, 5, '2020-2021');
 
--- INSERT: ClassTeachers
-INSERT INTO ClassTeachers (idClass, idTeachers, anneeAcademique) VALUES
+-- INSERT: ClassesTeachers
+INSERT INTO ClassesTeachers (idClasses, idTeachers, anneeAcademique) VALUES
 (1, 1, '2020-2021'),
 (2, 2, '2020-2021'),
 (3, 3, '2020-2021'),
@@ -656,9 +656,9 @@ SELECT
     lastName,
     sex,
     tel,
-    class AS "Class de"
+    Classes AS "Classes de"
 FROM Teachers t
-JOIN ClassTeachers
+JOIN ClassesTeachers
     ON idTeachers = t.id
-JOIN Class c
-    ON idClass = c.id;
+JOIN Classes c
+    ON idClasses = c.id;

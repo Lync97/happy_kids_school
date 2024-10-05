@@ -1,9 +1,9 @@
 \dS Parents;
 \dS Students;
 \dS Teachers;
-\dS Class;
-\dS StudentsClass;
-\dS ClassTeachers;
+\dS Classes;
+\dS StudentsClasses;
+\dS ClassesTeachers;
 \dS typeEvaluation;
 \dS typeSubjects;
 \dS Subjects;
