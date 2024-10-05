@@ -1,0 +1,10 @@
+\dS Parents;
+\dS Students;
+\dS Teachers;
+\dS Class;
+\dS StudentsClass;
+\dS ClassTeachers;
+\dS typeEvaluation;
+\dS typeMatiere;
+\dS Matiere;
+\dS Note;

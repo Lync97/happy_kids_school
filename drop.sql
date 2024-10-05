@@ -1,0 +1,10 @@
+DROP TABLE Note;
+DROP TABLE Matiere;
+DROP TABLE typeMatiere;
+DROP TABLE typeEvaluation;
+DROP TABLE ClassTeachers;
+DROP TABLE StudentsClass;
+DROP TABLE Class;
+DROP TABLE Teachers;
+DROP TABLE Students;
+DROP TABLE Parents;
