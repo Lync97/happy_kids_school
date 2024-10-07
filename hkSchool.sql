@@ -8,7 +8,7 @@ CREATE DATABASE happykidsschool
 \c happykidsschool;
 
 -- SCHEMA: hkshool
-CREATE SCHEMA IF NOT EXISTS hkshool
+CREATE SCHEMA IF NOT EXISTS hkschool
     AUTHORIZATION steph;
 
 -- Change: the search_path to hkschool
@@ -71,7 +71,7 @@ CREATE TABLE IF NOT EXISTS Classes
     class VARCHAR(10) NOT NULL,
     type CHAR(1) NOT NULL,
     CONSTRAINT pk_Classes PRIMARY KEY (id),
-    CONSTRAINT chk_Classes_class CHECK (classIN('1er Annee','2eme Annee','3eme Annee','4eme Annee','5eme Annee','6eme Annee')),
+    CONSTRAINT chk_Classes_class CHECK (class IN('1er Annee','2eme Annee','3eme Annee','4eme Annee','5eme Annee','6eme Annee')),
     CONSTRAINT chk_type_Classes CHECK (type IN('A','B','C','D'))
 );
 
@@ -650,15 +650,458 @@ INSERT INTO Grades (idStudents, idSubjects, idTypeEvaluation, dateGrades, nombre
 (10, 12, 3, TO_DATE('2021-07-20','YYYY-MM-DD'), 65, '2020-2021');
 
 
+-- Quelques requette.
 
+-- 1. Basic selection :
+
+-- Display the first name, last name, sex, phone number, and the classes for all teachers
 SELECT
     firstName,
     lastName,
     sex,
     tel,
-    Classes AS "Classes de"
-FROM Teachers t
+    class AS "Classes de"
+FROM
+    Teachers t
 JOIN ClassesTeachers
     ON idTeachers = t.id
 JOIN Classes c
     ON idClasses = c.id;
+
+-- Listez tous les parents avec leur nom, leur sexe et leur numéro de téléphone.
+SELECT
+    id,
+    firstName,
+    lastName,
+    sex,
+    tel
+FROM
+    Parents;
+
+-- Listez tous les étudiants avec leur nom, leur sexe et leur date de naissance.
+SELECT
+    id,
+    CONCAT(firstName, ' ', lastName) AS "Student name",
+    sex,
+    dateNaiss
+FROM
+    Students;
+
+
+-- 2. Requêtes avec jointures :
+
+-- Affichez les noms complets des étudiants et les noms complets de leurs parents.
+SELECT
+    s.id AS "Student ID",
+    CONCAT(s.firstName, ' ', s.lastName) AS "Student name",
+    p.id AS "ParentsID",
+    CONCAT(p.firstName, ' ', p.lastName) AS "Parent name"
+FROM
+    Students s
+JOIN Parents p
+    ON p.id = s.idParents
+ORDER BY s.id ASC;
+
+-- Listez les enseignants et les classes qu'ils enseignent pour une année académique donnée.
+SELECT
+    t.id AS "Teacher ID",
+    firstName || ' ' || lastName AS "Teacher name",
+    class
+FROM
+    Teachers t
+JOIN ClassesTeachers cs
+    ON cs.idTeachers = t.id
+JOIN Classes c
+    ON c.id = cs.idClasses
+WHERE anneeAcademique = '2020-2021';
+
+-- Affichez les étudiants, les classes dans lesquelles ils sont inscrits et l'année académique correspondante.
+SELECT
+    CONCAT(firstName, ' ', lastName) AS "Student name",
+    sex,
+    class,
+    anneeAcademique
+FROM
+    Students s
+JOIN StudentsClasses cs
+    ON cs.idStudents = s.id
+JOIN Classes c
+    ON c.id = cs.idClasses;
+
+
+-- 3. Data filter :
+
+-- Trouvez tous les enseignants qui ont été embauchés après le 1er janvier 2020.
+SELECT
+    id AS "Teacher ID",
+    firstName || ' ' || lastName AS "Teacher name",
+    sex,
+    tel,
+    dateEmbauche AS "Hire Date"
+FROM
+    Teachers
+WHERE
+    dateEmbauche > '2020-01-01';
+
+-- Listez les élèves qui sont nés après le 1er janvier 2015.
+SELECT
+    id AS "Student ID",
+    firstName || ' ' || lastName AS "Student name",
+    sex,
+    dateNaiss
+FROM
+    Students
+WHERE
+    dateNaiss < '2015-01-01';
+
+-- Affichez les élèves qui ont une note inférieure à 50 pour une matière donnée.
+SELECT
+    s.id AS "Student ID",
+    firstName || ' ' || lastName AS "Student name",
+    name,
+    nombreDePoint AS Grades
+FROM
+    Students s
+JOIN Grades g
+    ON g.idStudents = s.id
+JOIN Subjects sub
+    ON sub.id = g.idSubjects
+WHERE
+    nombreDePoint < 50
+ORDER BY Grades;
+
+
+-- 4. Agrégations et Groupes :
+
+-- Affichez le nombre d'élèves inscrits dans chaque classe pour l'année académique actuelle.
+SELECT
+    c.id AS "Student ID",
+    class AS "Classe name",
+    COUNT(s.id) AS "Student's numbers of the classe"
+FROM
+    Students s
+JOIN StudentsClasses sc
+    ON sc.idStudents = s.id
+JOIN Classes c
+    ON sc.idClasses = c.id
+GROUP BY
+    c.id,
+    class
+ORDER BY
+    c.id ASC;
+
+-- Calculez la moyenne des points obtenus par un élève dans une matière donnée pour une année académique donnée.
+SELECT
+    s.id AS "Student ID",
+    s.firstName || ' ' || s.lastName AS "Student name",
+    sub.name AS "Subject name",
+    ROUND(AVG(g.nombreDePoint), 2) AS Moyenne,
+    g.anneeAcademique AS "Academic Year"
+FROM
+    Students s
+JOIN Grades g
+    ON g.idStudents = s.id
+JOIN Subjects sub
+    ON sub.id = g.idSubjects
+JOIN typeEvaluation te
+    ON te.id = g.idTypeEvaluation
+WHERE
+    s.id=1
+    AND sub.name = 'Anglais'
+    AND anneeAcademique = '2020-2021'
+GROUP BY
+    s.id,
+    sub.name,
+    g.anneeAcademique
+ORDER BY
+    s.id ASC;
+
+-- Affichez la moyenne, le maximum et le minimum des notes pour chaque matière dans chaque classe pour une année académique.
+SELECT
+    sub.id AS "Subject ID",
+    sub.name AS "Subject name",
+    MIN(g.nombreDePoint) AS "MIN points",
+    MAX(g.nombreDePoint) AS "Max points",
+    ROUND(AVG(g.nombreDePoint),2) AS Moyenne,
+    g.anneeAcademique,
+    c.class AS "Classe name"
+FROM
+    Subjects sub
+JOIN Grades g
+    ON g.idSubjects = sub.id
+JOIN Students s
+    ON s.id = g.idStudents
+JOIN StudentsClasses st
+    ON st.idStudents = s.id
+JOIN Classes c
+    ON c.id = st.idClasses
+WHERE
+    g.anneeAcademique = '2020-2021'
+GROUP BY
+    sub.id,
+    sub.name,
+    g.anneeAcademique,
+    c.class
+ORDER BY
+    c.class;
+
+
+-- 5. Requêtes de mise à jour :
+
+-- Modifiez l'adresse d'un parent spécifique.
+UPDATE Parents
+    SET address = 'Rue Toussaint Louverture #38 Petit-goave, Haiti'
+WHERE id = 1;
+
+-- Mettez à jour la date d'embauche d'un enseignant dont la date était incorrecte.
+UPDATE Teachers
+    SET dateEmbauche = TO_DATE('2020-04-24','YYYY-MM-DD')
+WHERE id = 1;
+
+-- Changez la classe d'un élève pour l'année académique en cours.
+UPDATE StudentsClasses
+    SET idClasses = 2
+WHERE anneeAcademique='2020-2021' AND idStudents = 1;
+
+
+-- 6. Insertion de nouvelles données :
+
+-- Ajoutez un nouvel élève avec ses informations personnelles et liez-le à ses parents.
+INSERT INTO Students (idParents, firstName, lastName, sex, dateNaiss, dateIns) VALUES
+(1, 'joseph', 'johana', 'F', TO_DATE('2016-04-27','YYYY-MM-DD'), TO_DATE('2020-04-24','YYYY-MM-DD'));
+
+-- Insérez un nouveau professeur dans la table `Teachers` et assignez-le à une classe pour une année académique donnée.
+INSERT INTO Teachers (firstName, lastName, sex, address, tel, email, dateNaiss, dateEmbauche) VALUES
+('chery', 'wegbert', 'M', 'Poste Marchand #25 Port-au-prince, Haiti', '+509 4149 4405', 'cherywegbert@gmail.com', TO_DATE('1987-08-18','YYYY-MM-DD'), TO_DATE('2020-09-10','YYYY-MM-DD'));
+
+-- Ajoutez une nouvelle matière dans la table `Subjects` et associez-la à une catégorie de matières.
+INSERT INTO Subjects (idTypeSubjects, name, coeff, detail) VALUES
+(1, 'Chimie', 2, 'New subject added');
+
+-- 7. Suppression de données :
+
+-- Supprimez un élève qui a quitté l'école.
+DELETE FROM Students WHERE id = 12;
+
+-- Supprimez une note d'évaluation incorrecte pour un élève dans une matière donnée.
+DELETE
+FROM
+    Grades
+WHERE
+    idStudents = 10 AND
+    idSubjects = 12 AND
+    idTypeEvaluation = 3 AND
+    dateGrades = TO_DATE('2021-07-20 ','YYYY-MM-DD') AND
+    anneeAcademique = '2020-2021';
+
+-- Supprimez une classe qui n'est plus active.
+DELETE
+FROM
+    Classes c
+WHERE
+    c.id = 7;
+
+-- Supprimez toutes les classe qui ne sont plus active.
+DELETE
+FROM Classes c
+WHERE c.id NOT IN (
+    SELECT
+        st.idClasses
+    FROM
+        StudentsClasses st
+);
+
+
+-- 8. Requêtes avancées :
+
+-- Affichez la liste des élèves qui ont obtenu la meilleure note dans chaque matière pour une année académique.
+-- 1er facon
+SELECT
+    s.id AS "Student ID",
+    s.firstName || ' ' || s.lastName AS "Student name",
+    sub.name AS "Subject name",
+    MAX(g.nombreDePoint) AS Points,
+    g.anneeAcademique "Academic Year"
+FROM
+    Students s
+JOIN Grades g
+    ON g.idStudents = s.id
+JOIN Subjects sub
+    ON sub.id = g.idSubjects
+WHERE
+    g.nombreDePoint = (
+        SELECT
+            MAX(g2.nombreDePoint)
+        FROM
+            Grades g2
+        WHERE
+            g2.idSubjects = g.idSubjects
+            AND g2.anneeAcademique = g.anneeAcademique
+    )
+GROUP BY
+    s.id,
+    s.firstName,
+    s.lastName,
+    sub.name,
+    g.anneeAcademique
+ORDER BY
+    s.id;
+
+-- 2eme facon
+WITH MaxGrades AS (
+    SELECT
+        g.idSubjects,
+        g.anneeAcademique,
+        MAX(g.nombreDePoint) AS "Max Points"
+    FROM
+        Grades g
+    GROUP BY
+        g.idSubjects,
+        g.anneeAcademique
+)
+SELECT
+    s.id AS "Student ID",
+    s.firstName || ' ' || s.lastName AS "Student Name",
+    sub.name AS "Subject Name",
+    g.nombreDePoint AS "Max Points",
+    g.anneeAcademique AS "Academic Year"
+FROM
+    Students s
+JOIN Grades g
+    ON g.idStudents = s.id
+JOIN Subjects sub
+    ON sub.id = g.idSubjects
+JOIN MaxGrades mg
+    ON mg.idSubjects = g.idSubjects
+    AND mg.anneeAcademique = g.anneeAcademique
+    AND mg."Max Points" = g.nombreDePoint
+ORDER BY
+    s.id, sub.name, "Student Name";
+
+
+-- Trouvez les enseignants qui enseignent plusieurs classes pendant la même année académique.
+SELECT
+    t.id AS "Teacher ID",
+    t.firstName || ' ' || t.lastName AS "Teacher Name",
+    ct.anneeAcademique AS "Academic Year",
+    COUNT(ct.idClasses) AS "Number of Classes"
+FROM
+    Teachers t
+JOIN ClassesTeachers ct
+    ON ct.idTeachers = t.id
+JOIN Classes c
+    ON c.id = ct.idClasses
+GROUP BY
+    t.id,
+    t.firstName,
+    t.lastName,
+    ct.anneeAcademique
+HAVING
+    COUNT(ct.idClasses) > 1
+ORDER BY
+    "Number of Classes" ASC;
+
+-- Affichez le nom des élèves qui n'ont pas encore de note pour une matière spécifique pour une année académique donnée.
+SELECT
+    *
+FROM
+    Students
+WHERE id NOT IN (
+    SELECT
+        idStudents
+    FROM
+        Grades
+);
+
+/*
+    Afficher les 5 meilleurs élèves en fonction de la moyenne de leurs notes dans
+    une matière donnée pour une année académique spécifique :
+*/
+SELECT
+    s.id AS "Student ID",
+    s.firstName || ' ' || s.lastName AS "Student name",
+    sub.name AS "Subject name",
+    ROUND(AVG(g.nombreDePoint), 2) AS Moyenne,
+    g.anneeAcademique AS "Academic Year"
+FROM
+    Students s
+JOIN Grades g
+    ON g.idStudents = s.id
+JOIN Subjects sub
+    ON sub.id = g.idSubjects
+JOIN typeEvaluation te
+    ON te.id = g.idTypeEvaluation
+WHERE
+    sub.name = 'Anglais'
+GROUP BY
+    s.id,
+    sub.name,
+    g.anneeAcademique
+ORDER BY
+    Moyenne DESC
+LIMIT 5;
+
+-- Trouver les étudiants qui n'ont pas encore reçu de note pour une évaluation donnée dans une année académique :
+SELECT
+    s.id AS "Student ID",
+    s.firstName || ' ' || s.lastName AS "Student name"
+FROM
+    Students s
+LEFT JOIN Grades g
+    ON g.idStudents = s.id
+    AND g.idTypeEvaluation = 1
+    AND g.anneeAcademique = '2020-2021'
+WHERE
+    g.idStudents IS NULL;
+
+-- Trouver les classes où la moyenne des notes des élèves est inférieure à 50 pour une année académique donnée :
+SELECT
+    c.class AS "Class Name",
+    ROUND(AVG(g.nombreDePoint),2) AS "Average Points"
+FROM
+    Grades g
+JOIN Students s
+    ON g.idStudents = s.id
+JOIN StudentsClasses sc
+    ON s.id = sc.idStudents
+JOIN Classes c
+    ON sc.idClasses = c.id
+WHERE
+    g.anneeAcademique = '2020-2021'
+GROUP BY
+    c.class
+HAVING
+    AVG(g.nombreDePoint) < 50
+ORDER BY
+    c.class;
+
+-- Calculer le nombre d'années d'expérience de chaque enseignant et les trier par ordre décroissant :
+SELECT
+    t.id AS "Teacher ID",
+    t.firstName || ' ' || t.lastName AS "Teacher Name",
+    EXTRACT(YEAR FROM AGE(CURRENT_DATE, t.dateEmbauche)) AS "Years of Experience"
+FROM
+    Teachers t
+ORDER BY
+    "Years of Experience" DESC;
+
+-- Lister les élèves qui ont échoué à plus de deux matières pour une année académique :
+SELECT
+    s.id AS "Student ID",
+    s.firstName || ' ' || s.lastName AS "Student Name",
+    COUNT(g.idSubjects) AS "Failed Subjects"
+FROM
+    Grades g
+JOIN Students s
+    ON g.idStudents = s.id
+WHERE
+    g.nombreDePoint < 50
+    AND g.anneeAcademique = '2020-2021'
+GROUP BY
+    s.id,
+    s.firstName,
+    s.lastName
+HAVING
+    COUNT(g.idSubjects) > 2
+ORDER BY
+    "Failed Subjects" DESC;
